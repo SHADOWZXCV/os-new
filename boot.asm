@@ -1,30 +1,8 @@
 BITS 16
 ORG 0x7C00
 
-; read from disk
-; init base and offset to which the kernel is loaded to
-mov ax, 0
-mov es, ax
-mov bx, 0x1000
-
-; init configs for reading from disk
-mov ah, 02h
-mov al, 02h
-mov ch, 0
-mov cl, 02h
-mv dh, 0
-
-; interrupt for reading from disk
-int 13h
-or ah, ah
-jnz reset_drive
-jmp PRE_GDT
-
-reset_drive:
-	mov ah, 0
-	int 13h
-	or ah, ah
-	jnz reset_drive
+start:
+	jmp init_disk_read_kernel
 
 gdt_start:
 	dq 0x0000000000000000 ; entry 1 is null
@@ -48,6 +26,28 @@ gdtr:
 	dw (gdt_end - gdt_start) - 1
 	dd gdt_start
 
+
+init_disk_read_kernel: ; read from disk
+; init base and offset to which the kernel is loaded to
+mov ax, 0x1000
+mov es, ax
+mov bx, 0
+
+; init configs for reading from disk
+mov ah, 02h
+mov al, 02h
+mov ch, 0
+mov cl, 02h
+mov dh, 0
+mov dl, 0
+
+; interrupt for reading from disk
+read_disk:
+	int 13h
+	or ah, ah
+	jnz read_disk
+	
+	
 PRE_GDT:
 	cli ; disable interrupts
 	lgdt [gdtr]
@@ -60,18 +60,30 @@ PRE_GDT:
 	
 BITS 32
 enable_protected:
-		mov ax, 0x10
+		mov ax, 0x10 ; 0001 0000 ( code segment )
 		mov ds, ax
+		 mov es, ax
+		mov fs, ax
+		mov gs, ax
 		mov ss, ax
-		mov esp, 090000h
+		mov esp, 090000h ; stack place ( away from code segment )
+		
+		; enable io privilege to 3 ( highest )
+		pushfd
+		pop eax
+		
+		or eax, 0x3000
+		
+		push eax
+		popfd
 		
 		; print characters onto screen
-;		mov edi, 0xB8000
-;		mov byte [edi], 'A'
-;		mov byte [edi + 1], 0x1B
+		mov edi, 0xB8000
+		mov byte [edi], 'A'
+		mov byte [edi + 1], 0x1B
 ; hang:
 ;   jmp hang
-		jmp 08h:01000h ; main
+		jmp 08h:010000h ; main
 times 510-($-$$) db 0
 
 dw 0xAA55

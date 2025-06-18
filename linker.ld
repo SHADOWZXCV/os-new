@@ -1,29 +1,34 @@
-ENTRY(kernel_main)
+ENTRY(main)
+
+PHDRS {
+  text PT_LOAD FLAGS(5);  /* R + X = 0x4 + 0x1 */
+  data PT_LOAD FLAGS(6);  /* R + W = 0x4 + 0x2 */
+}
 
 SECTIONS {
-	.=0x10000
+	. = 0x10000;
 	
-	.text: AT(0x10000) {
-		*(.multiboot)
-		*(.text)
-		.= ALIGN(4096);
-	}
+	.start : {
+    *(.start)
+	} :text
 	
-	 .rodata : AT(ADDR(.text) + SIZEOF(.text))
+	.text :
+	{
+		*(.text*)
+	}:text
+	
+	.rodata :
     {
-        *(.rodata)
-        . = ALIGN(4096);
-    }
-
-    .data : AT(ADDR(.rodata) + SIZEOF(.rodata))
+        *(.rodata*)
+    }:text
+	
+    .data :
     {
-        *(.data)
-        . = ALIGN(4096);
-    }
-
-    .bss : AT(ADDR(.data) + SIZEOF(.data))
+        *(.data*)
+    }:data
+	
+    .bss :
     {
-        *(.bss)
-        . = ALIGN(4096);
-    }
+        *(.bss*)
+    }:data
 }
