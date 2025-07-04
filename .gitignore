@@ -1,5 +1,8 @@
 *.bin
 *.lst
 *.elf
+*.img
+qemu_log.txt
+*.map
 build/
 .vscode

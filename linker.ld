@@ -1,4 +1,4 @@
-ENTRY(main)
+ENTRY(start)
 
 PHDRS {
   text PT_LOAD FLAGS(5);  /* R + X = 0x4 + 0x1 */
@@ -6,29 +6,41 @@ PHDRS {
 }
 
 SECTIONS {
-	. = 0x10000;
+	. = 0x20000;
+
+    .keyboard_handler : {
+        KEEP(*(.keyboard_handler))
+    } :text
 	
-	.start : {
-    *(.start)
-	} :text
-	
-	.text :
-	{
-		*(.text*)
-	}:text
-	
-	.rodata :
-    {
+	. = 0x20100;
+
+    .start : {
+        KEEP(*(.start))
+    } :text
+
+    .text ALIGN(4K) : {
+        *(.text*)
+    } :text
+
+    .rodata ALIGN(4K) : {
         *(.rodata*)
-    }:text
-	
-    .data :
-    {
+    } :text
+
+    .data ALIGN(4K): {
         *(.data*)
-    }:data
-	
-    .bss :
-    {
+    } :data
+
+    .bss ALIGN(4K) : {
         *(.bss*)
-    }:data
+    } :data
+
+    /* Discard sections that are not needed in the final raw binary */
+    /DISCARD/ : {
+        *(.eh_frame)
+        *(.comment)
+        *(.note.GNU-stack)
+        *(.GCC.command.line)
+        *(.stab)
+        *(.stabstr)
+    }
 }

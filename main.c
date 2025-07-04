@@ -5,6 +5,18 @@
 #define VGA_MEMORY_WIDTH 80
 
 const char *tutorial3  = "Hello world!\nI would like to see how this works!";
+unsigned short offset = 0;
+
+const char normal_map[128] = {
+    0,  27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b', // 0x0 - 0x0E
+    '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',     // 0x0F - 0x1C
+    0,  // Ctrl
+    'a','s','d','f','g','h','j','k','l',';','\'','`',              // 0x1D - 0x29
+    0,  // Left Shift
+    '\\','z','x','c','v','b','n','m',',','.','/', 0,               // 0x2A - 0x36
+    '*', 0,  ' ', 0,  // Alt, Space
+    // ... fill in rest with 0 or extended keys
+};
 
 unsigned char in(unsigned short _port) {
 	unsigned char res;
@@ -19,13 +31,12 @@ void out(unsigned short _port, unsigned char data) {
 
 void print(const char *message) {
 	unsigned char *vidmem = (unsigned char *) BASE_ADDR_VGA;
-	unsigned short offset;
 	unsigned long i;
 	
-	out(CRTC_ADDRESS_REG, 14);
-	offset = in(CRTC_DATA_REG) << 8;
-	out(CRTC_ADDRESS_REG, 15);
-	offset |= in(CRTC_DATA_REG);
+// 	out(CRTC_ADDRESS_REG, 14);
+//	offset = in(CRTC_DATA_REG) << 8;
+//	out(CRTC_ADDRESS_REG, 15);
+//	offset |= in(CRTC_DATA_REG);
 	
 	vidmem += offset * 2;
 	
@@ -55,6 +66,7 @@ void print(const char *message) {
 			i++;
 		} else {
 			*vidmem = message[i++];
+			*(vidmem + 1) = 0x03;
 			offset++;
 			vidmem += 2;
 		}
@@ -66,7 +78,16 @@ void print(const char *message) {
 	out(CRTC_DATA_REG, (unsigned char)(offset));
 }
 
+__attribute__((section(".keyboard_handler")))
+void keyboard_handler() {
+	unsigned char scanCode = in(0x60);
+	
+	if (scanCode & 0x80) {
+        return;
+    }
 
+	print("1");
+}
 
 void clrscr() {
 	unsigned char *vidmem = (unsigned char *) 0xB8000;
@@ -82,6 +103,8 @@ void clrscr() {
    out(CRTC_DATA_REG, 0);
    out(CRTC_ADDRESS_REG, 15);
    out(CRTC_DATA_REG, 0);
+   
+   offset = 0;
 }
 
 void main() {
