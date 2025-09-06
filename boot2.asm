@@ -2,7 +2,7 @@ ORG 0x10000
 BITS 32
 
 keyboard_handler equ 0x20000
-kernel_start equ 0x20100
+kernel_start equ 0x20200
 idt_start:
 	%assign i 0
 	%rep 256
@@ -15,7 +15,7 @@ idtr:
 	dw idt_end - idt_start - 1
 	dd idt_start
 
-jmp init
+jmp initialize_keyboard
 	
 keyboard_isr:
 	pusha
@@ -25,7 +25,89 @@ keyboard_isr:
 	popa
 	iret
 	; implement
-	
+
+; set keyboard scancode set to 2 does not work
+initialize_keyboard:
+disable_translation:
+k_w_1:
+    in    al, 0x64
+    test  al, 0x02
+    jnz   k_w_1
+
+	mov al, 0x20 				; config byte
+	out 0x64, al
+
+k_w_2:
+	in   al, 0x64
+	test al, 0x01
+	jz	k_w_2
+
+	in  al, 0x60
+
+	and al, 0xBF	; clear bit 6 ( translation bit )
+	mov bl, al
+
+k_w_3:
+	in  al, 0x64
+	test al, 2
+	jnz k_w_3
+
+	mov al, 0x60
+	out 0x64, al
+
+k_w_4:
+	in al, 0x64
+	test al, 2
+	jnz k_w_4
+
+	mov al, bl
+
+	out 0x60, al
+
+code_set_2:
+	cli
+    ; ────────────────
+    ; Step 1: tell the keyboard we’re changing scan‑code set
+    ; ────────────────
+
+.wait_out_ready1:
+    in    al, 0x64              ; read controller status
+    test  al, 0x02              ; input‑buffer‑full bit?
+    jnz   .wait_out_ready1      ; if 1, still busy → wait
+
+	mov   al, 0xF0				; “Set Scan Code Set” command
+    out   0x60, al              ; send 0xF0 to the keyboard
+
+.wait_in_ready1:
+    in    al, 0x64              ; read status again
+    test  al, 0x01              ; output‑buffer‑full bit?
+    jz    .wait_in_ready1       ; if 0, no data → wait
+
+    in    al, 0x60              ; read ACK
+    cmp   al, 0xFA
+    jne   .wait_in_ready1   ; if not ACK, wait again
+
+    ; ────────────────
+    ; Step 2: send “2” (the desired set number)
+    ; ────────────────
+
+.wait_out_ready2:
+    in    al, 0x64
+    test  al, 0x02
+    jnz    .wait_out_ready2
+
+	mov   al, 2
+	out   0x60, al
+
+.wait_in_ready2:
+    in    al, 0x64
+	test  al, 0x01
+	jz   .wait_in_ready2
+
+	in	  al, 0x60
+    cmp   al, 0xFA
+    jne   .wait_in_ready2
+
 ; Remap PICs
 init:
 mov al, 0x11 ; ICW1, INIT AND ICW4
@@ -87,4 +169,4 @@ mov byte [edi + 1], 0x1B
 
 jmp 08h:kernel_start ; far jump to kernel
 
-times 2560 - ($ - $$) db 0 ; padding to ensure this file takes exactly a whole sector
+times 2560 - ($ - $$) db 0 ; padding to ensure this file takes exactly 4 whole sectors

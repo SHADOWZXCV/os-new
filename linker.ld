@@ -12,25 +12,25 @@ SECTIONS {
         KEEP(*(.keyboard_handler))
     } :text
 	
-	. = 0x20100;
+	. = 0x20200;
 
     .start : {
         KEEP(*(.start))
     } :text
 
-    .text ALIGN(4K) : {
+    .text : {
         *(.text*)
     } :text
 
-    .rodata ALIGN(4K) : {
+    .rodata : {
         *(.rodata*)
     } :text
 
-    .data ALIGN(4K): {
+    .data : {
         *(.data*)
     } :data
 
-    .bss ALIGN(4K) : {
+    .bss : {
         *(.bss*)
     } :data
 

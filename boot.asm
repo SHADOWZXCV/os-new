@@ -69,17 +69,20 @@ read_disk:
 PRE_GDT:
 	; enable A20
 	wait_keyboard_c_input:
-			in al, 0x64
-			test al, 2
+			in al, 0x64						; read status of PS/2
+			test al, 0b10					; test if bit 1 is set, meaning the buffer is clear
 			jnz wait_keyboard_c_input
-	mov al, 0xd1
-	out 0x64, al
+	mov al, 0xd1							; Write the next byte to the output port
+	out 0x64, al							; Command: Tell the PS/2 controller to wait for a byte I am writing next
 	wait_keyboard_c_output:
 			in al, 0x64
-			test al, 2
+			test al, 0b10
 			jnz wait_keyboard_c_output
 	mov al, 0xDF
-	out 0x60, al
+	out 0x60, al							; Write the byte DF to the PS/2 data port
+	; =================================== ;
+	; PROTECTED MODE ENABLE				  ;
+	; =================================== ;
 	lgdt [gdtr]
 	; enable protected mode bit in CR0, copies cr0, sets bit 0, then adds it back
 	mov eax, cr0
