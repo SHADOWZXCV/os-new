@@ -6,3 +6,4 @@ qemu_log.txt
 *.map
 build/
 .vscode
+gdb_commands.txt
