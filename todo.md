@@ -1,0 +1,5 @@
+- IMPLEMENT NUMLOCK keys double features
+- window glitching on auto scroll up
+- Implement the rest of keyboard keys
+- Implement scrolling up and down
+- Implement full commands
