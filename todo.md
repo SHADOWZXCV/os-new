@@ -3,3 +3,5 @@
 - Implement the rest of keyboard keys
 - Implement scrolling up and down
 - Implement full commands
+- The OS state should never be manipulated outside of the os_state.c file!
+- Implement cursor movement within the shell
