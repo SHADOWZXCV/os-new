@@ -6,7 +6,7 @@
 typedef unsigned int size;
 void *memset(void *ptr, int value, size size_to_cover);
 
-const char *welcome = "Xenos OS\nCurrent version: 0.0.1\n";
+char *welcome = "Xenos OS\nCurrent version: 0.0.1\n";
 
 void main() {
 	initOs();
@@ -17,9 +17,7 @@ void main() {
 		// shell
 		print("OS>");
 		while((c = getchar()) != '\n') {
-			putchar(c, 0x07);
 		}
-		putchar('\n', 0x07);
 	}
 }
 
