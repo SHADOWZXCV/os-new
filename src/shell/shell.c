@@ -1,7 +1,23 @@
 #include "shell/shell.h"
 #include "vga/vga.h"
+#include "print.h"
 
 #ifdef VGA_TEXT_MODE_H_
+
+void process(string command) {
+    byte isRsClear = strcmp(command, "rsclear");
+    byte isClear = strcmp(command, "clear");
+
+    if (isRsClear) {
+        clrscr();
+        print("Xenos OS\nCurrent version: 0.0.1\n");
+    } else if (isClear) {
+        clrscr();
+    } else {
+        print("Unknown command.\n");
+    }
+}
+
 
 void reset_input_buffer() {
     while(command_buffer.buffer_size) {
@@ -19,7 +35,7 @@ byte add_to_buffer(byte *characters) {
         return 1;
     }
 
-    unsigned char *character_buffer_index = command_buffer.ptr;
+    string character_buffer_index = command_buffer.ptr;
     short input_size = 0;
 
 	while(*characters) {
@@ -47,6 +63,12 @@ byte add_to_buffer(byte *characters) {
             command_buffer.buffer_size++;
             // TODO: HANDLE NEW LINES SENT, BY RENDERING THEN COMING BACK WITH A FRESH NEW COMMAND
             render_at_cursor(character_buffer_index, input_size);
+            *(--command_buffer.ptr) = '\0';
+            command_buffer.buffer_size--;
+
+            if (*command_buffer.buffer) {
+                process(command_buffer.buffer);
+            }
             reset_input_buffer();
             input_size = 0;
             character_buffer_index = command_buffer.ptr;

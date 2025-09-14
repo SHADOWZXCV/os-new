@@ -1,6 +1,7 @@
 #ifndef SHELL_H_
 #define SHELL_H_
 #include "types/primitives.h"
+#include "types/string.h"
 #define VGA_TEXT_LENGTH 256
 
 typedef struct {
@@ -15,6 +16,7 @@ static VGA_COMMAND command_buffer = {
     .ptr = command_buffer.buffer
 };
 
+void process(string command);
 void reset_input_buffer();
 byte add_to_buffer(byte *characters);
 byte rem_from_buffer(short length);
