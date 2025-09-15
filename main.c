@@ -6,9 +6,17 @@
 typedef unsigned int size;
 void *memset(void *ptr, int value, size size_to_cover);
 
-char *welcome = "Xenos OS\nCurrent version: 0.0.1\n";
+void eisr_handler_no_details(unsigned int vector, unsigned int error) {
+	if (vector == 0) {
+		print("FATAL ERROR: A DIVISION BY ZERO, HALTING...\n");
+		__asm__("hlt");
+	}
+
+	return;
+}
 
 void main() {
+	char *welcome = "Xenos OS\nCurrent version: 0.0.1\n";
 	initOs();
 	print(welcome);
 	

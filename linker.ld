@@ -6,13 +6,25 @@ PHDRS {
 }
 
 SECTIONS {
-	. = 0x20000;
+	. = 0x12000;
 
     .keyboard_handler : {
         KEEP(*(.keyboard_handler))
     } :text
-	
-	. = 0x20200;
+
+	. = 0x12100;
+    .idtr : {
+        KEEP(*(.idtr))
+    } :text
+    . = 0x12200;
+    .init_idt : {
+        KEEP(*(.init_idt))
+    } :text
+    . = 0x12300;
+    .initialize_keyboard : {
+        KEEP(*(.initialize_keyboard))
+    } :text
+	. = 0x12500;
 
     .start : {
         KEEP(*(.start))

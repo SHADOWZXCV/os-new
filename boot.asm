@@ -48,13 +48,13 @@ load_stage_2:
 
 init_disk_read_kernel: ; read from disk
 	; init base and offset to which the kernel is loaded to
-	mov ax, 0x2000
+	mov ax, 0x1200
 	mov es, ax
 	mov bx, 0
 
 	; init configs for reading from disk
 	mov ah, 02h
-	mov al, 0x40
+	mov al, 0x20
 	mov ch, 0
 	mov cl, 07h
 	mov dh, 0

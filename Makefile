@@ -11,7 +11,7 @@ MAIN_FILES = main.c start.c
 SRC_DIRS = $(shell find $(SRC_DIR) -name '*.c')
 SOURCES = $(MAIN_FILES) $(SRC_DIRS)
 
-OBJECTS = $(patsubst %.c,$(BUILD_DIR)%.o,$(SOURCES))
+OBJECTS = $(BUILD_DIR)int_handlers.o $(patsubst %.c,$(BUILD_DIR)%.o,$(SOURCES))
 
 HEADER_DIRS = $(shell find include -type d)
 INCLUDE_FLAGS = $(addprefix -I, $(HEADER_DIRS))

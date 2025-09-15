@@ -13,7 +13,7 @@ done
 echo "Deleting old files..."
 rm -f kernel.bin kernel.elf os-image.bin os.img \
       kernel_elf_sections.txt kernel_elf_symbols.txt \
-      boot1.bin boot2.bin bootloader.bin qemu_log.txt
+      boot1.bin boot2.bin int_handlers.bin bootloader.bin qemu_log.txt
 
 echo "Assembling bootloader..."
 nasm -f bin boot.asm -l boot1.lst -o boot1.bin
@@ -25,6 +25,7 @@ echo "Compiling and linking kernel..."
 # gcc -c main.c -o build/main.o -ffreestanding -m32 -O2 -nostdlib -g -O0 -fno-omit-frame-pointer
 # gcc -c start.c -o build/start.o -ffreestanding -m32 -O2 -nostdlib -g -O0 -fno-omit-frame-pointer
 # ld -m elf_i386 -T linker.ld build/start.o build/main.o -o kernel.elf -Map kernel.map
+nasm -f elf32 int_handlers.asm -l int_handlers.lst -o build/int_handlers.o
 make all
 objcopy -O binary kernel.elf kernel.bin
 
