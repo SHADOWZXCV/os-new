@@ -5,6 +5,13 @@ stage2_start equ 0x10000
 
 start:
 	cli ; disable interrupts for protected mode later
+	; enable the RTC interrupt
+	push ax
+	mov al, 0x8B
+	out 0x70, al
+	mov al, 0x20
+	out 0x71, al
+	pop ax
 	jmp load_stage_2
 
 gdt_start:

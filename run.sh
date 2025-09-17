@@ -25,7 +25,7 @@ echo "Compiling and linking kernel..."
 # gcc -c main.c -o build/main.o -ffreestanding -m32 -O2 -nostdlib -g -O0 -fno-omit-frame-pointer
 # gcc -c start.c -o build/start.o -ffreestanding -m32 -O2 -nostdlib -g -O0 -fno-omit-frame-pointer
 # ld -m elf_i386 -T linker.ld build/start.o build/main.o -o kernel.elf -Map kernel.map
-nasm -f elf32 int_handlers.asm -l int_handlers.lst -o build/int_handlers.o
+nasm -f elf32 -g int_handlers.asm -l int_handlers.lst -o build/int_handlers.o
 make all
 objcopy -O binary kernel.elf kernel.bin
 

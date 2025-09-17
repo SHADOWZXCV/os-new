@@ -1,4 +1,5 @@
 extern keyboard_handler
+extern timer_handler
 extern eisr_handler_no_details
 
 idt_start:
@@ -29,8 +30,29 @@ init_idt:
 	mov byte [idt_start + 4], 0 ; reserved
 	mov byte [idt_start + 5], 0x8E ; 32-bit interrupt gate, and present bit
 	shr eax, 16
-	mov word [idt_start + 6], ax ; high offset of keyboard_isr
+	mov word [idt_start + 6], ax ; high offset of div_by_zero
+	mov eax, clock_timer_isr
+	mov word [idt_start + 0x28 * 8 + 0], ax ; low offset
+	mov word [idt_start + 0x28 * 8 + 2], 0x08 ; code segment of kernel
+	mov byte [idt_start + 0x28 * 8 + 4], 0 ; reserved
+	mov byte [idt_start + 0x28 * 8 + 5], 0x8E ; 32-bit interrupt gate, and present bit
+	shr eax, 16
+	mov word [idt_start + 0x28 * 8 + 6], ax ; high offset of clock_timer_isr
 ret
+
+clock_timer_isr:
+	pusha
+	call timer_handler
+	mov al, 0x0C
+	out 0x70, al
+	in al, 0x71
+
+	; EOI
+	mov al, 0x20
+	out 0xA0, al
+	out 0x20, al
+	popa
+iret
 
 keyboard_isr:
 	pusha

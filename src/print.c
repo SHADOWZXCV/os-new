@@ -1,9 +1,10 @@
-#include "../include/print.h"
-#include "../include/vga/vga.h"
-#include "../include/shell/shell.h"
-#include "../include/IO/io.h"
-#include "../include/IO/keyboard.h"
-#include "../include/shared/os_state.h"
+#include "print.h"
+#include "vga/vga.h"
+#include "shell/shell.h"
+#include "IO/io.h"
+#include "IO/keyboard.h"
+#include "shared/os_state.h"
+#include "shared/math/math.h"
 
 #ifdef VGA_TEXT_MODE_H_
 
@@ -42,6 +43,31 @@ void printf(const char *message, char hex) {
 				putchar(isBitSet ? '1' : '0');
 			}
 
+			message += 2;
+			continue;
+		} else if (*message == '%' && *(message+1) == 'd') {
+			unsigned int number;
+			if (hex < 0) {
+				putchar('-');
+				number = (unsigned int)(-(long)hex);
+			} else {
+				number = (unsigned int) hex;
+			}
+
+			int divider = 1;
+			char cell = 0;
+
+			// find out the biggest digit on our number
+			while (number / divider >= 10) {
+				divider *= 10;
+			}
+
+			while (divider) {
+				cell = number / divider;
+				number %= divider;
+				divider /= 10;
+				putchar('0' + cell);
+			}
 			message += 2;
 			continue;
 		}

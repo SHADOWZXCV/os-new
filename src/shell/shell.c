@@ -1,5 +1,6 @@
 #include "shell/shell.h"
 #include "vga/vga.h"
+#include "interrupts/time.h"
 #include "print.h"
 
 #ifdef VGA_TEXT_MODE_H_
@@ -7,12 +8,17 @@
 void process(string command) {
     byte isRsClear = strcmp(command, "rsclear");
     byte isClear = strcmp(command, "clear");
+    byte isTime = strcmp(command, "time");
 
     if (isRsClear) {
         clrscr();
         print("Xenos OS\nCurrent version: 0.0.1\n");
     } else if (isClear) {
         clrscr();
+    } else if (isTime) {
+        printf("%d:", hour);
+        printf("%d:", minute);
+        printf("%d\n", second);
     } else {
         print("Unknown command.\n");
     }

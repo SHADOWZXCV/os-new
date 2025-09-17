@@ -49,9 +49,10 @@ call init_idt
 lidt [idtr]
 sti
 ; unmask ( enable ) interrupts for master and slave
-mov al, 0b11111101
+; keyboard + RTC + slave's IRQ2
+mov al, 0b11111001
 out 0x21, al
-mov al, 0xFF
+mov al, 0b11111110
 out 0xA1, al
 
 ; print debug character "B" to video memory
