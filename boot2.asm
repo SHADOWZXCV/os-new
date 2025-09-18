@@ -8,9 +8,20 @@ kernel_start equ 0x12500
 
 call initialize_keyboard
 
+; set up 8253 PIT chip
+mov al, 110110b
+out 0x43, al
+mov bx, 1193180 / 100
+
+mov ax, bx
+out 0x40, al
+xchg ah, al
+out 0x40, al
+
+
 ; Remap PICs
 ; http://www.brokenthorn.com/Resources/OSDevPic.html
-init:
+remap_pic:
 mov al, 0x11 ; ICW1, INIT AND ICW4
 out 0x20, al
 jmp $+2
@@ -50,7 +61,7 @@ lidt [idtr]
 sti
 ; unmask ( enable ) interrupts for master and slave
 ; keyboard + RTC + slave's IRQ2
-mov al, 0b11111001
+mov al, 0b11111000
 out 0x21, al
 mov al, 0b11111110
 out 0xA1, al

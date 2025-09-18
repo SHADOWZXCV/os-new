@@ -15,6 +15,11 @@ void eisr_handler_no_details(unsigned int vector, unsigned int error) {
 	return;
 }
 
+void PIT_handler() {
+	// TODO: DEBUG, IMPLEMENT!
+	// print("PIT@!!!\n");
+}
+
 void main() {
 	char *welcome = "Xenos OS\nCurrent version: 0.0.1\n";
 	initOs();

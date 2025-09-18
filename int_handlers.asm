@@ -1,4 +1,5 @@
 extern keyboard_handler
+extern PIT_handler
 extern timer_handler
 extern eisr_handler_no_details
 
@@ -17,6 +18,13 @@ idtr:
 
 section .init_idt
 init_idt:
+	mov eax, PIT_isr
+	mov word [idt_start + 0x20 * 8 + 0], ax ; low offset
+	mov word [idt_start + 0x20 * 8 + 2], 0x08 ; code segment of kernel
+	mov byte [idt_start + 0x20 * 8 + 4], 0 ; reserved
+	mov byte [idt_start + 0x20 * 8 + 5], 0x8E ; 32-bit interrupt gate, and present bit
+	shr eax, 16
+	mov word [idt_start + 0x20 * 8 + 6], ax ; high offset of PIT_handler
 	mov eax, keyboard_isr
 	mov word [idt_start + 0x21 * 8 + 0], ax ; low offset
 	mov word [idt_start + 0x21 * 8 + 2], 0x08 ; code segment of kernel
@@ -40,9 +48,20 @@ init_idt:
 	mov word [idt_start + 0x28 * 8 + 6], ax ; high offset of clock_timer_isr
 ret
 
+PIT_isr:
+	pushad
+	call PIT_handler
+
+	; EOI
+	mov al, 0x20
+	out 0x20, al
+	popad
+iret
+
 clock_timer_isr:
-	pusha
+	pushad
 	call timer_handler
+	; read register C to let the chip continue its work
 	mov al, 0x0C
 	out 0x70, al
 	in al, 0x71
@@ -51,15 +70,15 @@ clock_timer_isr:
 	mov al, 0x20
 	out 0xA0, al
 	out 0x20, al
-	popa
+	popad
 iret
 
 keyboard_isr:
-	pusha
+	pushad
 	call keyboard_handler
 	mov al, 0x20
 	out 0x20, al  ; EOI
-	popa
+	popad
 	iret
 	; implement
 
@@ -149,10 +168,10 @@ code_set_2:
 ret
 
 EISR_NODETAILS:
-    pusha
+    pushad
     push dword 0
     push dword 0
     call eisr_handler_no_details
-    add esp, 8  ; since we pushed 2 4-byte arguments onto the stack, we need to skip them for the popa to work
-    popa
+    add esp, 8  ; since we pushed 2 4-byte arguments onto the stack, we need to skip them for the popad to work
+    popad
 iretd
