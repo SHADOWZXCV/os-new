@@ -1,6 +1,7 @@
 ORG 0x10000
 BITS 32
 
+boot_info_arr equ 0x900
 idtr equ 0x12100
 init_idt equ 0x12200
 initialize_keyboard equ 0x12300
@@ -21,7 +22,7 @@ out 0x40, al
 
 ; Remap PICs
 ; http://www.brokenthorn.com/Resources/OSDevPic.html
-remap_pic:
+init_pic:
 mov al, 0x11 ; ICW1, INIT AND ICW4
 out 0x20, al
 jmp $+2
@@ -71,6 +72,8 @@ mov edi, 0xB8000
 mov byte [edi], 'B'
 mov byte [edi + 1], 0x1B
 
+mov eax, 0x2BADB002
+mov ebx, boot_info_arr
 jmp 08h:kernel_start ; far jump to kernel
 
 times 2560 - ($ - $$) db 0 ; padding to ensure this file takes exactly 4 whole sectors

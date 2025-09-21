@@ -1,4 +1,4 @@
-#include "../../include/shared/os_state.h"
+#include "shared/os_state.h"
 
 volatile struct State os_state = {
     .screen_state = {
@@ -11,3 +11,5 @@ volatile struct State os_state = {
 		}
 	}
 };
+
+multiboot_info *boot_info_arr = (multiboot_info*)0x900;

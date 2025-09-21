@@ -107,7 +107,7 @@ int len(unsigned char *buffer) {
     int length = 0;
     while (*buffer) {
         length++;
-        *buffer++;
+        buffer++;
     }
 
     return length;

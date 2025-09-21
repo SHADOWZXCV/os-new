@@ -20,10 +20,10 @@ void print(char *message) {
 	print_raw_text(message, size);
 }
 
-void printf(const char *message, char hex) {
+void printf(const char *message, unsigned long long hex) {
 	while(*message) {
 		if (*message == '%' && *(message+1) == 'x') {
-			unsigned short cursor = 2;
+			unsigned short cursor = 8;
 			while (cursor) {
 				char hexNibble = (hex >> (--cursor) * 4) & 0xF;
 

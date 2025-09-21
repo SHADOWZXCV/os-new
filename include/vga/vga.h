@@ -11,7 +11,7 @@
 
 typedef struct {
     void (*print)(char *);
-    void (*printf)(const char *, char);
+    void (*printf)(const char *, unsigned long long);
     void (*clrscr)();
 } VGA_TEXT;
 

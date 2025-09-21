@@ -1,7 +1,105 @@
 BITS 16
 ORG 0x7C00
+struc boot_info
+    memory_low   resw 1
+    memory_high  resw 1
+    m_map_add    resw 1
+    m_map_off    resw 1
+    m_map_length resw 1
+endstruc
 
 stage2_start equ 0x10000
+boot_info_arr equ 0x900
+
+call BIOS_get_mem_size
+
+; this is the struct I need on my kernel, the multiboot info one
+; define words and dwords here eventually with the values I have on ax, and bx
+; and put them on the memoryHi + memoryLo
+mov [boot_info_arr], ax
+mov [boot_info_arr + 2], bx
+; then I call:
+call BIOS_get_memory_info
+mov [boot_info_arr + 4], es
+mov word [boot_info_arr + 6], 0
+mov [boot_info_arr + 8], bp
+; then I get the es:di position, and the length from bp, and I put them somewhere 
+; so that my main kernel entry when called, I can push the boot_info address on
+; the stack, and have access to all this info ?
+; continue the rest of the program
+call start
+
+BIOS_get_mem_size:
+	mov ax, 0
+    mov es, ax          ; segment
+    mov di, 0x0            ; (initial) offset
+    mov ebx, 0x0         ; (initial) continuation value
+	xor	ecx, ecx		;clear all registers. This is needed for testing later
+	xor	edx, edx
+	mov	ax, 0xe801
+	int	0x15
+	jc	error_mem_size
+	cmp	ah, 0x86		;unsupported function
+	je	error_mem_size
+	cmp	ah, 0x80		;invalid command
+	je	error_mem_size
+	jcxz use_ax			;bios may have stored it in ax,bx or cx,dx. test if cx is 0
+	mov	ax, cx			;its not, so it should contain mem size; store it
+	mov	bx, dx
+ 
+    use_ax:
+        ret
+ 
+    error_mem_size:
+        mov	ax, -1
+        mov	bx, 0
+ret
+
+BIOS_get_memory_info: 
+	mov ax, 0x910
+	mov es, ax
+	mov di, 0
+    xor ebx, ebx
+    xor bp, bp
+    ; INPUT
+    mov edx, 'PAMS'
+    mov eax, 0xe820
+    mov ecx, 24
+
+    int 0x15
+
+    jc error_mem_map
+
+    cmp eax, 'PAMS'
+    jne error_mem_map
+
+    test ebx, ebx ; there's no way we're done!
+    je error_mem_map
+
+    start_mmap:
+        jcxz continue
+
+        mov ecx, [es:di + 8]
+        test ecx, ecx
+        jne nice
+        mov ecx, [es:di + 12]
+        jecxz continue
+
+    nice:
+        inc bp
+        add di, 24
+    continue:
+        test ebx, ebx
+        je finish
+        mov edx, 'PAMS'
+        mov ecx, 24
+        mov eax, 0xe820
+        int 0x15
+        jmp start_mmap
+    error_mem_map:
+        stc
+    finish:
+ret
 
 start:
 	cli ; disable interrupts for protected mode later
@@ -77,10 +175,9 @@ jmp PRE_GDT
 
 check_a20:
 	pushf
+	pusha
 	push ds
 	push es
-	push di
-	push si
 
 	cli
 
@@ -114,10 +211,9 @@ check_a20:
 	jne end_check_a20
 	mov ax, 1
 end_check_a20:	
-	pop si
-    pop di
     pop es
     pop ds
+	popa
     popf
 ret
 

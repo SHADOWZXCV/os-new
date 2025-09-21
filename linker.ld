@@ -7,6 +7,7 @@ PHDRS {
 
 SECTIONS {
 	. = 0x12000;
+	kernel_start = .;
 
     .keyboard_handler : {
         KEEP(*(.keyboard_handler))
@@ -55,4 +56,6 @@ SECTIONS {
         *(.stab)
         *(.stabstr)
     }
+
+    kernel_end = .;
 }

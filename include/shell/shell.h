@@ -16,6 +16,7 @@ static VGA_COMMAND command_buffer = {
     .ptr = command_buffer.buffer
 };
 
+void print_mem_info(short detailed);
 void process(string command);
 void reset_input_buffer();
 byte add_to_buffer(byte *characters);
