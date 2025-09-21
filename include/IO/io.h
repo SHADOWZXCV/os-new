@@ -1,7 +1,8 @@
 #ifndef IO_H_
 #define IO_H_
+#include "types/primitives.h"
 
-unsigned char in(unsigned short _port);
-void out(unsigned short _port, unsigned char data);
+byte in(word _port);
+void out(word _port, byte data);
 
 #endif

@@ -1,5 +1,6 @@
 #ifndef KEYBOARD_H_
 #define KEYBOARD_H_
+#include "types/primitives.h"
 
 #define COMMAND_PORT_KEYBOARD 0x64
 #define STATUS_PORT_KEYBOARD 0x64
@@ -20,7 +21,7 @@
 
 typedef struct {
 	char body[2000];
-	unsigned char isEmpty;
+	byte isEmpty;
 	int headRead;
 	int headWrite;
 } Buffer;
@@ -28,12 +29,12 @@ typedef struct {
 typedef struct {
 	Buffer scanCodes;
 	// current keyboard state: lshift|lctrl|ralt|0|lalt|rctrl|rshift|caps
-	unsigned char state;
+	byte state;
 	// current character state: 00000|released|extended|ready
-	unsigned char charState;
+	byte charState;
 } KeyboardState;
 
-void update_keyboard_states(unsigned char *scanCode);
+void update_keyboard_states(byte *scanCode);
 unsigned char processKeyboardBuffer();
 void set_keyboard_leds();
 void wait_before_read_keyboard();

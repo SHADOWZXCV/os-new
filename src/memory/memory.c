@@ -8,10 +8,10 @@ memory_state memory;
 memory_manager manager;
 
 void *memset(void *ptr, int value, size size_to_cover) {
-	unsigned char *p = (unsigned char *) ptr;
+	byte *p = (byte *) ptr;
 
 	while(size_to_cover--) {
-		*p++ = (unsigned char)value;
+		*p++ = (byte)value;
 	}
 
     return ptr;
@@ -24,16 +24,16 @@ void init_memory_map() {
     // Old, does not capture the entire memory size
     // unsigned int size = ((boot_info_arr->memory_high * 64) + boot_info_arr->memory_low + SIZE_1_KB);
     dword size = 0;
-    unsigned int base_mmap_addr = (boot_info_arr->mmap_addr << 4) | boot_info_arr->mmap_offset;
+    dword base_mmap_addr = (boot_info_arr->mmap_addr << 4) | boot_info_arr->mmap_offset;
 
     memory.mmap_entries = (mmap_entry *) base_mmap_addr;
     memory.mmap_entries_count = boot_info_arr->mmap_length;
 
-        for (short i = 0; i < memory.mmap_entries_count; i++) {
-            mmap_entry *entry = get_memory_map_entry_details(i);
+    for (short i = 0; i < memory.mmap_entries_count; i++) {
+        mmap_entry *entry = get_memory_map_entry_details(i);
 
-            size += entry->length / 1024;
-        }
+        size += entry->length / 1024;
+    }
 
     memory.memory_size_kb = size;
 }

@@ -5,18 +5,19 @@
 
 #include "print.h"
 #include "IO/io.h"
+#include "types/primitives.h"
 
 extern int century_register;
-extern unsigned char second;
-extern unsigned char minute;
-extern unsigned char hour;
-extern unsigned char day;
-extern unsigned char month;
-extern unsigned int year;
+extern byte second;
+extern byte minute;
+extern byte hour;
+extern byte day;
+extern byte month;
+extern dword year;
 
 void enable_clock_timer_chip();
 void timer_handler();
-unsigned char get_RTC_register(int reg);
+byte get_RTC_register(int reg);
 int get_update_in_progress_flag();
 
 #endif

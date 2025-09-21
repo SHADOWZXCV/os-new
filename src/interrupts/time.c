@@ -1,19 +1,18 @@
 #include "time.h"
 
 int century_register = 0x00; 
-unsigned char second;
-unsigned char minute;
-unsigned char hour;
-unsigned char day;
-unsigned char month;
-unsigned int year;
-unsigned char M[3];
+byte second;
+byte minute;
+byte hour;
+byte day;
+byte month;
+dword year;
 
 void enable_clock_timer_chip() {
     __asm__("cli");
     // enable the clock timer chip
     out(0x70, 0x8B);
-    unsigned char prev = in(0x71);
+    byte prev = in(0x71);
     out(0x70, 0x8B);
     out(0x71, prev | 0x40); // set the 7th bit of register B ( enable the interrupt chip )
     // reduce the frequency to 64 Hz
@@ -29,32 +28,34 @@ int get_update_in_progress_flag() {
       return (in(CMOS_RTC_REG_PORT) & 0x80);
 }
 
-unsigned char get_RTC_register(int reg) {
+byte get_RTC_register(int reg) {
       out(CMOS_RTC_INDEX_PORT, reg);
       return in(CMOS_RTC_REG_PORT);
 }
 
 void timer_handler() {
-	unsigned char century;
-	unsigned char last_second;
-	unsigned char last_minute;
-	unsigned char last_hour;
-	unsigned char last_day;
-	unsigned char last_month;
-	unsigned char last_year;
-	unsigned char last_century;
-	unsigned char registerB;
+	byte century;
+	byte last_second;
+	byte last_minute;
+	byte last_hour;
+	byte last_day;
+	byte last_month;
+	byte last_year;
+	byte last_century;
+	byte registerB;
 
 	// Note: This uses the "read registers until you get the same values twice in a row" technique
 	//       to avoid getting dodgy/inconsistent values due to RTC updates
 
 	while (get_update_in_progress_flag());                // Make sure an update isn't in progress
+
 	second = get_RTC_register(0x00);
 	minute = get_RTC_register(0x02);
 	hour = get_RTC_register(0x04);
 	day = get_RTC_register(0x07);
 	month = get_RTC_register(0x08);
 	year = get_RTC_register(0x09);
+
 	if(century_register != 0) {
 		century = get_RTC_register(century_register);
 	}

@@ -5,6 +5,7 @@
 #include "IO/keyboard.h"
 #include "shared/os_state.h"
 #include "shared/math/math.h"
+#include "types/primitives.h"
 
 #ifdef VGA_TEXT_MODE_H_
 
@@ -20,10 +21,10 @@ void print(char *message) {
 	print_raw_text(message, size);
 }
 
-void printf(const char *message, unsigned long long hex) {
+void printf(const char *message, qword hex) {
 	while(*message) {
 		if (*message == '%' && *(message+1) == 'x') {
-			unsigned short cursor = 8;
+			word cursor = 8;
 			while (cursor) {
 				char hexNibble = (hex >> (--cursor) * 4) & 0xF;
 
@@ -36,9 +37,9 @@ void printf(const char *message, unsigned long long hex) {
 			message += 2;
 			continue;
 		} else if (*message == '%' && *(message+1) == 'b') {
-			unsigned short cursor = 8;
+			word cursor = 8;
 			while(cursor) {
-				unsigned short isBitSet = (hex >> --cursor) & 0x1;
+				word isBitSet = (hex >> --cursor) & 0x1;
 
 				putchar(isBitSet ? '1' : '0');
 			}
@@ -75,9 +76,9 @@ void printf(const char *message, unsigned long long hex) {
 	}
 	
 	out(CRTC_ADDRESS_REG, 14);
-	out(CRTC_DATA_REG, (unsigned char)(os_state.screen_state.buffer_offset >> 8));
+	out(CRTC_DATA_REG, (byte)(os_state.screen_state.buffer_offset >> 8));
 	out(CRTC_ADDRESS_REG, 15);
-	out(CRTC_DATA_REG, (unsigned char)(os_state.screen_state.buffer_offset));
+	out(CRTC_DATA_REG, (byte)(os_state.screen_state.buffer_offset));
 }
 
 char getchar() {
