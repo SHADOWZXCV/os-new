@@ -12,4 +12,4 @@ volatile struct State os_state = {
 	}
 };
 
-multiboot_info *boot_info_arr = (multiboot_info*)0x900;
+multiboot_info *boot_info_arr = (multiboot_info*)0x500;
